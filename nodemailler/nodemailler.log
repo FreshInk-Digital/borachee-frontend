@@ -1,0 +1,5 @@
+Starting BEEM SMS server
+BEEM_SMS_ENABLED = false
+BEEM_API_URL set = true
+Configured recipients (count): 3 [ '*********503', '*********529', '*********566' ]
+BEEM SMS server running on port 4000

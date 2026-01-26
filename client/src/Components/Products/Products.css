@@ -1,0 +1,64 @@
+.programs-slider {
+  margin: 80px auto;
+  width: 90%;
+}
+
+.program {
+  padding: 0 10px;
+  position: relative;
+}
+
+.program img {
+  width: 100%;
+  border-radius: 10px;
+  display: block;
+}
+
+.caption {
+  border-radius: 10px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #bdbebe96;
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #000;
+  padding: 10px;
+  transition: 0.4s;
+}
+
+.caption h2 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+/* Custom styles for slick slider buttons */
+.slick-prev,
+.slick-next {
+  width: 30px;
+  height: 30px;
+  background-color: #bdbebe96 !important;
+  border-radius: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  font-size: 20px;
+  color: white; /* Change arrow color if needed */
+  opacity: 1; /* Ensure arrows are visible */
+}
+
+/* ------ MEDIA QUERY ------ */
+@media (max-width: 650px) {
+  .program {
+    flex-basis: 100%;
+    margin: 20px 0;
+  }
+}
