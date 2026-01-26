@@ -33,6 +33,7 @@ app.get('/', (req, res) => {
 console.log('Starting BEEM SMS server');
 console.log('BEEM_SMS_ENABLED =', process.env.BEEM_SMS_ENABLED || 'false');
 console.log('BEEM_API_URL set =', !!process.env.BEEM_API_URL);
+console.log('BEEM_SENDER_NAME =', process.env.BEEM_SENDER_NAME || 'KANISANI');
 
 const startupRecipients = (process.env.BEEM_RECIPIENTS || '')
   .split(',')
@@ -57,9 +58,13 @@ app.post('/', async (req, res) => {
     const beemUrl = process.env.BEEM_API_URL;
     if (!beemUrl) return res.status(500).json({ success: false, message: 'BEEM_API_URL not set' });
 
-    const apiKey = process.env.BULK_SMS_BEEM_API_KEY;
-    const secretKey = process.env.BULK_SMS_BEEM_SECRET_KEY;
-    const sender = process.env.BEEM_SENDER_NAME || 'BORACHEE';
+  const apiKey = process.env.BULK_SMS_BEEM_API_KEY;
+  const secretKey = process.env.BULK_SMS_BEEM_SECRET_KEY;
+  // Use the BEEM_SENDER_NAME env var when available. Default to 'KANISANI' while
+  // the 'BORACHEE' brand is under review. Trim and limit to 11 chars (recommended
+  // max for SMS sender names).
+  const rawSender = process.env.BEEM_SENDER_NAME || 'KANISANI';
+  const sender = String(rawSender).trim().slice(0, 11).toUpperCase();
 
     const recipientsList = Array.isArray(recipients) && recipients.length ? recipients : startupRecipients;
     if (recipientsList.length === 0) return res.status(500).json({ success: false, message: 'No recipients configured' });
@@ -105,8 +110,45 @@ app.post('/', async (req, res) => {
           console.log(`SMS sent (form) to ${maskNumber(recipient)}`);
           results.push({ to: recipient, success: true, response: response2.data });
         } catch (err2) {
-          console.error(`Failed to send SMS to ${maskNumber(recipient)}:`, err2.response?.data || err2.message);
-          results.push({ to: recipient, success: false, error: err2.response?.data || err2.message });
+          // log detailed error for debugging (but do not print secrets)
+          console.error(`Failed to send SMS to ${maskNumber(recipient)} (form fallback):`, {
+            status: err2.response?.status,
+            data: err2.response?.data,
+            message: err2.message,
+          });
+
+          // Try Bearer token fallback (some BEEM setups expect bearer tokens)
+          try {
+            const bearerHeaders = { 'Content-Type': 'application/json' };
+            if (secretKey) bearerHeaders['Authorization'] = `Bearer ${secretKey}`;
+            const response3 = await axios.post(beemUrl, payload, { headers: bearerHeaders, timeout: 15000 });
+            console.log(`SMS sent (bearer json) to ${maskNumber(recipient)}`);
+            results.push({ to: recipient, success: true, response: response3.data });
+          } catch (err3) {
+            try {
+              const params3 = new URLSearchParams();
+              params3.append('api_key', apiKey || '');
+              params3.append('secret_key', secretKey || '');
+              params3.append('sender', sender || '');
+              params3.append('to', recipient);
+              params3.append('message', smsText);
+
+              const bearerFormHeaders = { 'Content-Type': 'application/x-www-form-urlencoded' };
+              if (secretKey) bearerFormHeaders['Authorization'] = `Bearer ${secretKey}`;
+
+              const response4 = await axios.post(beemUrl, params3.toString(), { headers: bearerFormHeaders, timeout: 15000 });
+              console.log(`SMS sent (bearer form) to ${maskNumber(recipient)}`);
+              results.push({ to: recipient, success: true, response: response4.data });
+            } catch (err4) {
+              console.error(`All attempts failed for ${maskNumber(recipient)}:`, {
+                primary: err.message || err,
+                formFallback: err2.response?.data || err2.message,
+                bearerFallbackStatus: err4.response?.status,
+                bearerFallbackData: err4.response?.data,
+              });
+              results.push({ to: recipient, success: false, error: err4.response?.data || err4.message || err2.response?.data || err2.message });
+            }
+          }
         }
       }
     }
