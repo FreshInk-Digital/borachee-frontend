@@ -133,7 +133,7 @@ const Contact = () => {
             <img src={location_icon} alt="" />
             Branch Office: Mbeya Sales Office, Tunduma Road, Ilomba Mbeya
             <br />
-            Mbeya, Tanzania - Mobile: 0658199566
+            Mbeya, Tanzania - Mobile: 0794476503
           </li>
         </ul>
       </div>
