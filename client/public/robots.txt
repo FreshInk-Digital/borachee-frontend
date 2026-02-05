@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Optional: block common non-public paths (uncomment if these exist)
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /api/
+
+Sitemap: https://borachee.co.tz/sitemap.xml
