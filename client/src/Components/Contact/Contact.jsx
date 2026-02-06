@@ -1,5 +1,5 @@
-// File: client/src/Components/Contact/Contact.jsx
-import React, { useState } from "react";
+// File: src/pages/Contact/Contact.jsx (adjust path to your project)
+import React, { useMemo, useState } from "react";
 import "./Contact.css";
 
 import msg_icon from "../../assets/msg-icon.png";
@@ -10,12 +10,48 @@ import insta_icon from "../../assets/insta-ico.png";
 import whatsapp_icon from "../../assets/whatsapp-ico.png";
 import white_arrow from "../../assets/white-arrow.png";
 
-const Contact = () => {
+export default function Contact() {
   const formInitialDetails = { name: "", email: "", phone: "", message: "" };
 
   const [formDetails, setFormDetails] = useState(formInitialDetails);
   const [isSending, setIsSending] = useState(false);
   const [status, setStatus] = useState({ success: null, message: "" });
+
+  const API_BASE = useMemo(() => {
+    // 1) Prefer env variables (Vite or CRA)
+    const viteBase =
+      (typeof import.meta !== "undefined" &&
+        import.meta.env &&
+        import.meta.env.VITE_API_BASE) ||
+      "";
+    const craBase =
+      (typeof process !== "undefined" &&
+        process.env &&
+        process.env.REACT_APP_API_BASE) ||
+      "";
+
+    const envBase = String(viteBase || craBase || "").trim();
+    if (envBase) return envBase.replace(/\/$/, "");
+
+    // 2) Smart defaults (your exact domains)
+    const host =
+      typeof window !== "undefined" ? window.location.hostname : "";
+
+    const isLocal =
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host.endsWith(".local");
+
+    if (isLocal) return "http://localhost:3000/api";
+
+    // If you are on borachee.co.tz, use backend subdomain by default
+    if (host === "borachee.co.tz" || host === "www.borachee.co.tz") {
+      return "https://server.borachee.co.tz/api";
+    }
+
+    // 3) Fallback: same-origin /api (in case you later proxy)
+    return `${window.location.origin}/api`;
+  }, []);
 
   const onFormUpdate = (category, value) => {
     setFormDetails((prev) => ({ ...prev, [category]: value }));
@@ -37,7 +73,7 @@ const Contact = () => {
     const timeoutId = setTimeout(() => controller.abort(), 20000);
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(`${API_BASE}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json;charset=utf-8" },
         body: JSON.stringify(formDetails),
@@ -50,7 +86,7 @@ const Contact = () => {
         setStatus({
           success: false,
           message:
-            "Backend returned a non-JSON response. Confirm the Node server is running and proxy is correct.",
+            "Server returned non-JSON (usually backend down / wrong URL). Check server.borachee.co.tz API.",
         });
         return;
       }
@@ -64,12 +100,15 @@ const Contact = () => {
       }
 
       if (data?.success === true) {
-        setStatus({ success: true, message: data?.message || "Message sent successfully" });
+        setStatus({
+          success: true,
+          message: data?.message || "Message sent successfully",
+        });
         setFormDetails(formInitialDetails);
       } else {
         setStatus({
           success: false,
-          message: data?.message || "Failed to send message. Please try again.",
+          message: data?.message || "Failed to send. Try again.",
         });
       }
     } catch (err) {
@@ -78,7 +117,7 @@ const Contact = () => {
         message:
           err?.name === "AbortError"
             ? "Request timed out. Please try again."
-            : "Failed to fetch. Ensure Node backend is running on http://localhost:4000.",
+            : "Could not reach the server. Please try again later.",
       });
     } finally {
       clearTimeout(timeoutId);
@@ -117,7 +156,11 @@ const Contact = () => {
           </li>
 
           <li>
-            <a href="https://www.instagram.com/borachee_tz/" target="_blank" rel="noreferrer">
+            <a
+              href="https://www.instagram.com/borachee_tz/"
+              target="_blank"
+              rel="noreferrer"
+            >
               <img src={insta_icon} alt="" /> @borachee_tz
             </a>
           </li>
@@ -147,7 +190,6 @@ const Contact = () => {
             onChange={(e) => onFormUpdate("name", e.target.value)}
             required
           />
-
           <input
             type="email"
             value={formDetails.email}
@@ -155,7 +197,6 @@ const Contact = () => {
             onChange={(e) => onFormUpdate("email", e.target.value)}
             required
           />
-
           <input
             type="tel"
             value={formDetails.phone}
@@ -163,7 +204,6 @@ const Contact = () => {
             onChange={(e) => onFormUpdate("phone", e.target.value)}
             required
           />
-
           <textarea
             rows="6"
             value={formDetails.message}
@@ -178,13 +218,13 @@ const Contact = () => {
 
           {status.message ? (
             <div className="row">
-              <p className={status.success ? "success" : "danger"}>{status.message}</p>
+              <p className={status.success ? "success" : "danger"}>
+                {status.message}
+              </p>
             </div>
           ) : null}
         </form>
       </div>
     </div>
   );
-};
-
-export default Contact;
+}
