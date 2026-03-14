@@ -139,20 +139,9 @@ export default function Contact() {
         </p>
 
         <ul>
-          <li>
-            <a href="mailto:sales@borachee.co.tz" target="_blank" rel="noreferrer">
-              <img src={mail_icon} alt="" /> sales@borachee.co.tz
-            </a>
-          </li>
-
+          
           <li>
             <img src={phone_icon} alt="" /> +255 767 876 503
-          </li>
-
-          <li>
-            <a href="https://wa.link/ba03zv" target="_blank" rel="noreferrer">
-              <img src={whatsapp_icon} alt="" /> +255 767 876 503
-            </a>
           </li>
 
           <li>
@@ -167,16 +156,16 @@ export default function Contact() {
 
           <li>
             <img src={location_icon} alt="" />
-            Plot 68, Mbezi Beach, Tangi Bovu
+            Dar Office: Plot 68, Bagamoyo Road, Mbezi Beach Tangibovu,
             <br />
             Dar es Salaam, Tanzania
           </li>
 
           <li>
             <img src={location_icon} alt="" />
-            Branch Office: Mbeya Sales Office, Tunduma Road, Ilomba Mbeya
+           Mbeya Office: Tunduma Road, Ilomba,
             <br />
-            Mbeya, Tanzania - Mobile: 0794476503
+            Mbeya, Tanzania
           </li>
         </ul>
       </div>

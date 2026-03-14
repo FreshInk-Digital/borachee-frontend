@@ -53,7 +53,7 @@ const App = () => {
             <About />
             <Title subTitle="OUR PRODUCTS" title="What We Offer" />
             <Products />
-            <Title subTitle="GALLERY" title="Our Team In Action" />
+            <Title subTitle="GALLERY" title="Our Products and Brands" />
             <Campus />
             <Title subTitle="OUR BRANDS" title=" Collaboration With Global Brands" />
             <Brands />

@@ -18,7 +18,7 @@ const Brands = () => {
       </div>
       <div className='brand-logo'>
         <img src={brand_1} alt="Brand 1" />
-        <span>WizardFix</span>
+        <span>WIZARDFIX</span>
       </div>
     </div>
   );
